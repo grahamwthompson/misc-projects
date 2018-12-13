@@ -1,0 +1,41 @@
+CLI Commands
+
+rustc --version
+rustc <filename>
+cargo new <projectname>
+cargo build
+cargo check  - check for compiler errors no build
+cargo run  - build and run
+cargo update - update dependencies to most recent versions
+cargo doc --open  auto build docs for src + dependencies
+
+rustup update
+rustup doc
+rustup component add rustfmt   - adds component rust formatting tool
+
+
+Language
+
+Immutable by default must declare mut explicitly for each variable.
+let x = 5;  vs  let mut x = 5;
+
+Associated functions - String::new() syntax for calling a function
+associated with a type, generally would call this a static method.
+
+References use & and are immutable by default so you often have to
+use mut on them. &mut varname.
+
+Match - a lot like a switch
+
+match number {
+    1 => println!("One!"),
+    2 => println!("Two!"),
+}
+
+Errors and successes are dealt with by enumeration types so we often
+use match's to do error handling.
+
+let var : u32 = match inputstring.parse() {
+    Ok(num) => num,
+    Err(_) => continue,
+}
