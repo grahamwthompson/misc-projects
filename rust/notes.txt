@@ -39,3 +39,228 @@ let var : u32 = match inputstring.parse() {
     Ok(num) => num,
     Err(_) => continue,
 }
+
+Constants
+
+const x:u32 = 69;
+
+Constants must be type annotated, are always immutable and are initialized at
+compilation. You can never assign the result of a function or any other runtime
+calculation to a constant. Good stuff.
+
+Shadowing
+
+let x = 5;
+let x = "five";
+
+In rust we're allowed to overwrite the names of previous variables. Not their
+memory, there's still a number type with the value of 5 until its presumably
+destroyed somehow. But whenever we reference "x" it now refers to "five". They
+call this shadowing and use it to keep code clean as though we were using a language
+like python.... which come to think of it does the same thing under the hood. Creates
+a new object in memory and points the identifier to it.... but more explicit.
+Good stuff.
+
+Types
+
+Scalar Types: int, floating point, boolean, character
+
+Integer
+
+signed and unsigned variants annotated like
+let x:u32;  let x:i32;   sizes are 8,16,32,64,128 and 'size' which is architecture
+dependent (32 bit on 32 and 64 on 64 apparently)
+
+Exits with error on assignment of overflowing literals to integers. Wrapping type
+exists that allows you to do this but only if you set it explicitly.
+
+Floats
+
+f32 and f64 are the default ones, f64 reccomended on modern cpus since its about as
+fast. f64 is also the default.
+
+Boolean
+
+let x = true;   or   let x:bool = true;
+lowercase for the boolean literals, booleans are one byte in size.
+
+Character
+
+let c = 'a';
+uses single and double quote convention for chars vs string literals from c.
+Chars are unicode by default, not ascii, that's interesting seems good though.
+
+Compound Types: tuples, arrays
+
+Tuples
+
+let tup = (500, 6.4, 1);  or  let tup: (i32, f64, u8) = (500, 6.4, 1);
+Python style variable 'destructuring'
+let (x, y, z) = tup;
+
+Indexing tuples is done like   tup.0, tup.1, etc...  why this instead of tup[0]?
+For that matter what is the difference between these and structs?
+
+Arrays
+
+let a: [i32; 5] = [1, 2, 3, 4, 5];  or let a = [1,2,3,4,5];
+Standard c / c++ style fixed length, fixed type array indexed in the normal way.
+a[0], a[1] etc... allocated on the stack. Are tuples not stack allocated?
+
+Syntax is a little different from c here, uses a two part type annotation [type; length]
+instead of type name [length]; Its pretty sensible though I like it. Also has some
+sort of automatic bounds checking for array overflows. C actually stores the length
+of its arrays too but when you're passing them its generally just passing the array
+as a pointer so you don't keep the length when you're operating on it. Rust must
+be doing something differently here.
+
+
+Functions
+
+fn hello_world() {
+    println!("hello to the world");
+}
+
+Snake case by convention.
+
+fn parameterized(x: i32){
+    println!("{}", x);
+}
+
+Function parameters must be type annotated, we can't use type inference to make
+generic functions like we can with auto and friends.
+
+Expressions and Statements
+
+statements do not return values, so in rust you can't assign a statement to a
+variable. There are two things that are statements in rust that are expressions in
+c and other languages and restrict us from doing bad/fun things.
+
+functions and variable assignments. So no..  let x = let y = 6;  or
+let x = fn my_function(){}
+
+Literal operations are expressions  3 + 3
+Macros are expressions  ??
+Blocks are expressions  let x = {let y = 5;  y+5};
+Literal operations with semicolon are statements:  x + 5;  or 3 + 3;
+
+
+What in the world is with these block, scope expression things, they're kind of
+cool but what in the world would we use them for?
+
+Functions Return Value
+fn five() -> i32{
+    5
+}
+
+Functions do the matlab style of implicitly returning the last expression value
+from the function as the return. We have to declare a type of return beforehand.
+So the following does not work.
+
+fn five() -> i32{
+    5;
+}
+
+We can also explicitly return with a return statement, which is necessary in some
+cases with branching statments and etc.
+
+fn numbers(x: i32) -> i32{
+    if(x < 5){
+        return 1;
+    }
+    else{
+        return 99999;
+    }
+}
+
+Comments
+
+C style comments everywhere //comment
+Something called documentation comments exists but it does not sound like they
+have the normal multi-line comments just single line by default I guess.
+
+Control Flow
+
+If
+
+let x = 5;
+if x < 5{
+    println!("less than five");
+}
+else{
+    println!("greater than five");
+}
+
+Pretty standard c style again, does not require parentheses just uses expressions
+that return a boolean I think?  Yes! No automatic conversion of types like integer
+to boolean like js and python. If its not returning an actual boolean it throws an
+error.
+
+let x = 66;
+if x {
+    println!("never get here this is an error");
+}
+
+No elif for our boy rust, just use standard else if to handle multiple branching.
+
+if x < 5{
+
+} else if x == 6{
+
+} else if x == 7{
+
+} else{
+
+}
+
+Conditionals are expressions so we can do our ternary type assignments like this.
+
+let x : bool = if x < 5 {
+    true
+} else{
+    false   // note we must leave off the semicolon to have an expression
+}
+
+Loops: loop, while, for
+
+loop is like a while(true), just repeats forever until we hit a break statement
+or call some sort of termination like ctr+c.
+
+loop{
+    println!("this is the song that never ends");
+}
+
+Oh so this is neat, loop actually is an expression as well just like an if expression
+in rust so we can assign values based on a loop. break can actually return values like
+a return statement.. and without them it gives the expression value maybe? Nope,
+must explicitly return.  break with no arguments after returns empty type () which
+gives an error.  Also have to end loop with a semicolon since the whole thing is a
+statment when assigning.
+
+
+While
+
+let mut number = 3;
+
+while number != 0 {
+    println!("{}!", number);
+    number = number - 1;
+}
+
+while loops are absolutely standard c/c++/everything style while loops that continue
+while the expression they are declared with evaluates to true. Not as easy to do
+the cute assign from the expression value of the loop with whiles.
+
+For
+
+No c style for, this is a for each loop by default. Goes element by element over
+things with an iter() method? Arrays are itterable looks like tuples are not
+bet you they're secretly just structs.
+
+for number in (1..4).rev() {
+    println!("{}!", number);
+}
+
+We also have some convenience iterator functions like rev() looks like and some
+sort of syntax for creating an array within a range with (1..4) I guess?  Thats
+an array not a tuple right?
