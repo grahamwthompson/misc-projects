@@ -99,7 +99,14 @@ Python style variable 'destructuring'
 let (x, y, z) = tup;
 
 Indexing tuples is done like   tup.0, tup.1, etc...  why this instead of tup[0]?
-For that matter what is the difference between these and structs?
+For that matter what is the difference between these and structs? A useful thing
+to know here is that tuples containing only 'copy' types for instance
+
+let tup: (i32, i32) = (50,50);
+
+is itself a copy type (the values are copied rather than the reference) and is
+allocated entirely on the stack. Is the same true for structs containing only
+copy types?
 
 Arrays
 
@@ -129,6 +136,20 @@ fn parameterized(x: i32){
 
 Function parameters must be type annotated, we can't use type inference to make
 generic functions like we can with auto and friends.
+
+Functions can return tuples for easy multivalue returns like if we were working
+in python.
+
+fn calculate_length(s: String) -> (String, usize){
+    let length = s.len();
+    (s, length)
+}
+Note that for the above function, the return value is implictly given by the
+evaluation of the block scope {}, which for any block scope is the expression
+value. So this actually behaves the same is if we did an assignment based on a
+block.  let x: i32 = {do something; 15};  This is why the semicolon must be
+left off the final tuple (putting a semicolon turns it into a statement) and
+means the block itself is no longer an expression. I like the consistency of this.
 
 Expressions and Statements
 
@@ -264,3 +285,87 @@ for number in (1..4).rev() {
 We also have some convenience iterator functions like rev() looks like and some
 sort of syntax for creating an array within a range with (1..4) I guess?  Thats
 an array not a tuple right?
+
+Strings
+
+let s = String::from("hello");
+
+So these are a little interesting in rust. They deal with it a little bit like
+arrays in c where what's actually stored in the variable on the stack is a pointer
+to the memory location on the heap. Similarly this gives us a pointer, length and
+capacity. The length is the current amount being used and the capacity is the
+total amount allocated.
+
+let s2 = s;   // copies over only the reference to the string object on the heap
+
+What this does is copies over the reference and invalidates the initial reference
+s, if you try to then reference s it throws an error. So they call the assignment
+operation on strings like this a move rather than a copy since there's only ever
+one valid reference to the heap object at a time. Prevents any double frees.
+
+If we do want to do an actual copy of the data from the heap to another object
+we use clone() method. I dig the syntax super explicit to what its doing.
+
+let s1 = String::from("hello");
+let s2 = s1.clone();
+
+This only applies to types like strings that are typically non-static size and
+heap allocated. Things like integers have a different 'annotation' that allows
+them to be copied like
+
+let x = 5;
+let y = x;
+
+without invalidating the intial x. Trait is called 'copy' the variables with this
+value don't need anything special done when 'drop' the special function called
+when a variable goes out of scope is called. Presumably this is a raii pattern thing
+types that don't acquire any external resources can just be directly unallocated
+on the stack and we don't have to worry about causing any memory leaks from prematurely
+freeing them. All the scalar types and tuples that only contain other copy types
+are copy. Yah I like this, it makes what happens with resource allocation pretty godamn
+explicit. Similar thing with functions, acts like a copy
+
+References
+
+Uses c++ style references for everything.
+let x: u32 = 5;
+let y: &u32 = &x;
+let z: &u32;
+
+& is the reference operator, gives a reference to the thing and * is dereference.
+behaves a little interestingly in the case of things like arrays and strings
+that under the hood are a pointer, length, etc.. the references the actual object
+on the heap. Instead of copying that and potentially having multiple floating
+around that complicate when it will be unallocated we just have a reference to
+that single reference object. References are read only by default.
+
+Mutable References
+
+This gets pretty interesting too. So first we are only allowed to have a mutable
+reference to a mutable type. Then we are only allowed to have one mutable reference
+to a given object in each given scope. Can have any number of immutable references.
+Also not allowed to mix for some reason, so no mutable and immutable.
+
+Slices
+
+So this is cool they have a slice syntax fairly similar to python but with ..
+instead of : , what is kind of cool about this is what its doing under the hood
+seems to be pointer math. It's getting a pointer to some start position within
+the array/string type and a length of how far to go to. I think this makes it
+basically like a second reference to the initial memory location. Can these be
+mutable then or are you only allowed to read from them?
+
+let slice = &a[1..5]
+
+Structs
+
+struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64,
+    active: bool,
+}
+
+Ok so I think the difference between the struct and the tuple is that the tuple
+does not have named fields while the struct does. Good difference to keep an
+eye on.
