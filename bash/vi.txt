@@ -1,0 +1,12 @@
+i - insert
+x - delete a char
+d - delete (gesture)
+w - next word 
+e - next end of word
+u - undo
+U - undo everything on line
+
+h - left
+l - right
+j - down
+k - up
