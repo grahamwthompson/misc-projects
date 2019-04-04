@@ -284,7 +284,8 @@ for number in (1..4).rev() {
 
 We also have some convenience iterator functions like rev() looks like and some
 sort of syntax for creating an array within a range with (1..4) I guess?  Thats
-an array not a tuple right?
+an array not a tuple right? It's a struct std::ops::Range. Likely has some sort
+of generator to allow it to do long ranges like in python.
 
 Strings
 
