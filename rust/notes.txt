@@ -40,6 +40,11 @@ let var : u32 = match inputstring.parse() {
     Err(_) => continue,
 }
 
+Something to add here match enforces exhaustiveness checking on the type
+it is passed. So every possible value of x must be present in the match 
+object or we need to have the _ => println!("this covers all other situations");
+catchall in match. Very useful for handling errors or results objects exhaustively.
+
 Constants
 
 const x:u32 = 69;
@@ -121,6 +126,8 @@ of its arrays too but when you're passing them its generally just passing the ar
 as a pointer so you don't keep the length when you're operating on it. Rust must
 be doing something differently here.
 
+Length is accessible via 
+a.len();
 
 Functions
 
