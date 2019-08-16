@@ -1,14 +1,16 @@
 fn main() {
     let mut s: String = String::from("hello buddy");
-    let slice1 = &s[0..5];
+    let slice1 = &mut s[0..5];
     //let slice2: &str = &s[0..5];  // so this is a little weird string slices
     // are of type &str rather than String, or anything whats with that?
 
+    slice1 = &mut String::from("ohnos");
+
     println!("{}", slice1);
-    println!("{}", s);
-    s.clear();
-    println!("{}", slice1);
-    println!("{}", s);
+   // println!("{}", s);
+   // s.clear();
+    //println!("{}", slice1);
+    //println!("{}", s);
 
     //println!("{}", slice1);
 

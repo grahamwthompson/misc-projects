@@ -1,0 +1,8 @@
+[package]
+name = "ring-test"
+version = "0.1.0"
+authors = ["Graham Thompson <grahamwt42@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+ring = "0.14.6"

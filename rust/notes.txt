@@ -347,6 +347,11 @@ reference to a mutable type. Then we are only allowed to have one mutable refere
 to a given object in each given scope. Can have any number of immutable references.
 Also not allowed to mix for some reason, so no mutable and immutable.
 
+let x: u8 = 8;
+let y = &mut x;  or  let y: &mut u32 = &mut x;
+
+We can do type annotation on references but by convention looks like people do not.
+
 Slices
 
 So this is cool they have a slice syntax fairly similar to python but with ..
@@ -370,3 +375,155 @@ struct User {
 Ok so I think the difference between the struct and the tuple is that the tuple
 does not have named fields while the struct does. Good difference to keep an
 eye on.
+
+Ownership 
+
+Core concept in rust for how memory management is done. No reference counting garbage
+collector or manual allocation/free like in c. Instead we have variable 'ownership'
+of any chunk of memory. Any chunk of memory has no more than one owner at a time. 
+When the owner goes out of scope the memory is unallocated with drop().
+
+let s1 = String::from("goodbye");  // s1 is the owner 
+let s2 = s1;  // s2 is now the owner
+
+println!("{}", s1);  // throws an error since s1 is no longer valid
+
+We have two general classes of types "copy" types which are allocated on the stack and
+have a copy trait to do a deep copy of their values whenever you assign them.
+
+let a:i32 = 51;
+let b = a;
+
+copies the value 51 into the new variable b, while for our previous example with the string 
+types what is stored on the stack is a simple data structure containing the pointer to our 
+memory on the heap. A length of the current string and a total capacity of the allocated memory.
+When we do another assignment operation on it it will copy only that datastructure over and not
+touch the heap unless we clone it.
+
+let s2 = s1.clone();   
+
+This is to prevent two valid pointers for modifying the underlying heap data structure from
+being usable at the same time. As soon as a copy of the variable's data structure is made 
+the first one is invalidated.
+
+Borrowing
+
+Similar concept with references to variables, any created reference to a variable creates another
+pointer to that heap resource that could potentially cause issues. Whenever a reference mutable/immutable
+is created for a variable the original variable is invalid until the borrow is finished. It's been
+'borrowed' so its no longer available until it comes back... get it oho. Can have either one mutable
+reference or any number of immutable references but not both. 
+
+Modules 
+
+mod vehicles {
+	mod cars {
+		fn vroom(x: uint8)->String {
+			// do something here
+		}
+	}   
+	mod horses {
+		fn neigh(x: uint8)->String {
+			// do another thing here
+		}
+	}
+
+Modules are declared like this and can then be referenced with the double colon notation. :: 
+crate::vehicles::car::vroom(6) 
+You can nest modules as much as you want and it looks like store functions structs or any 
+other type you want in there. Modules seem to be the standard way to structure code and make 
+packages. Pretty clean and straightforwards I like it. All elements inside of modules are private
+by default so the above code would actually fail. Can also set individual elements of 
+
+mod vehicles {
+	pub mod unicycle {
+		pub fn fall(){
+			// do a thing here
+		}
+	}
+}
+
+crate::vehicles::unicycle::fall()  // works
+
+We have to add pub to both the function and the containing module. Declaring pub on a module 
+makes it accessible from the parent module. Modules declared in the same level as main are 
+accessible by default so we can leave pub off vehicles. 
+
+crate/relative/super 
+
+crate is a keyword that refers to the current 'crate' one is running in. 'super' refers to the
+parent module, so for instance we might use that to call a function in a parent module 'vehicles'
+from 'unicycle'. Leaving off any keywords like  vehicles::unicycle::fall() just uses whatever 
+the current module scope is.  
+
+USE 
+
+The use keyword is the equivalent of import and does a pretty clean job of bringing a module 
+into the current namespace. The convention is to use the parent module of functions but to 
+use the thing itself for structs and other datastructures. For instance 
+
+use std::collections::HashMap;
+
+For absolute paths we still use create.
+
+use crate::vehicles;
+unicycle::fall();
+
+For relative paths there's a keyword that has to be used 'self' they acknowledge this is inconsistent
+and it may be going away in the future. 
+
+use self::vehicles;
+
+AS
+
+Like python you can rename things in the import statement for convenience or to avoid name
+conflicts.
+
+use std::fmt::Result;
+use std::io::Result as IoResult;
+
+PUB USE and re-exporting
+
+When we import stuff with use the newly imported modules are private by default even if we
+originally defined them as public. So they can be used from the module you imported them to
+but if you want to expose them for other non-local modules to call you need to re-export them
+by calling 'pub use'
+
+mod things {
+	pub use vehicles;
+} 
+
+mod stuff {
+	crate::things::unicycle::fall();
+}
+
+Pretty straightforwards and all the data hiding by default. I dig it. 
+Oh and this is cute you can use linux {item1, item2} syntax to simplify big lists of
+use statements.
+
+use std::io;
+use std::io::Write;
+
+use std::io::{self, Write}
+
+or to do all of it you can use our boy kleene star
+
+use std::io::*;
+
+Multiple Files Structuring
+
+Ok so this is actually pretty nice setup for building modular programs, the way you put a module
+in a different file is just to specify the name of the module in your main.rs file with semicolon
+
+mod mymod; 
+
+Then you create a file with the name mymod, no extra module markings needed, and crates will build
+and import that file as your named module. To have nested hierarchies of modules in seperate files
+just do a 
+
+pub mod nestedmod;
+
+inside the imported module mymod, this is great super java like structure no header files or __init__
+file import nonsense. 
+
+
