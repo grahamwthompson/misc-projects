@@ -333,6 +333,26 @@ freeing them. All the scalar types and tuples that only contain other copy types
 are copy. Yah I like this, it makes what happens with resource allocation pretty godamn
 explicit. Similar thing with functions, acts like a copy
 
+String literals are handled with a different type the &str or string slice type, 
+they have a fixed size and cant be mutated. String literals are static &str. 
+
+To convert a string slice/literal to a heap allocated String its common to use the 
+"hello".to_string() method. To do the opposite we can use & to coerce a reference to
+the string. So
+
+fn takes_slice(slice: &str){
+	println!("got {}", slice);
+}
+
+fn main() {
+	let s = "hello".to_string();
+	takes_slice(&s); // passes string slice to our function
+}
+
+This also comes in where we noticed yesterday that you can't match a string using string
+literals. You have to first convert it to a string reference. Lets check how hard it is
+to do that. 
+
 References
 
 Uses c++ style references for everything.
