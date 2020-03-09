@@ -59,7 +59,7 @@ def check(folder, checkpoint_file):
                 if info['modification_time'] != stat.st_mtime:
                     changed = True
                     access_string += 'modified-{} '.format(formatTimestamp(stat.st_mtime))
-                if info['creation_time'] != stat.st_mtime:
+                if info['creation_time'] != stat.st_ctime:
                     changed = True
                     access_string += 'created-{} '.format(formatTimestamp(stat.st_ctime))
 
